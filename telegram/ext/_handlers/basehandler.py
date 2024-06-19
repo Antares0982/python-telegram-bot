@@ -18,14 +18,17 @@
 # along with this program.  If not, see [http://www.gnu.org/licenses/].
 """This module contains the base class for handlers as used by the Application."""
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Generic, Optional, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Generic, Optional, Protocol, Tuple, TypeVar, Union, runtime_checkable
 
 from telegram._utils.defaultvalue import DEFAULT_TRUE
 from telegram._utils.repr import build_repr_with_selected_attrs
 from telegram._utils.types import DVType
 from telegram.ext._utils.types import CCT, HandlerCallback
 
+
 if TYPE_CHECKING:
+    from typing import TypeGuard  # type: ignore
+
     from telegram.ext import Application
 
 RT = TypeVar("RT")
@@ -172,3 +175,18 @@ class BaseHandler(Generic[UT, CCT], ABC):
             check_result: The result (return value) from :meth:`check_update`.
 
         """
+
+
+@runtime_checkable
+class AtomHandler(Protocol[CCT]):
+    async def do_process_atom(
+        self,
+        context: Optional[CCT],
+        update: object,
+        app: "Application[Any, CCT, Any, Any, Any, Any]",
+    ) -> Tuple[bool, Optional[CCT], bool]:
+        raise NotImplementedError
+
+
+def need_atom_process(handler: BaseHandler) -> "TypeGuard[AtomHandler]":
+    return isinstance(handler, AtomHandler)

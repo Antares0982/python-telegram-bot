@@ -67,7 +67,7 @@ from telegram.error import TelegramError
 from telegram.ext._basepersistence import BasePersistence
 from telegram.ext._contexttypes import ContextTypes
 from telegram.ext._extbot import ExtBot
-from telegram.ext._handlers.basehandler import BaseHandler
+from telegram.ext._handlers.basehandler import BaseHandler, need_atom_process
 from telegram.ext._updater import Updater
 from telegram.ext._utils.stack import was_called_by
 from telegram.ext._utils.trackingdict import TrackingDict
@@ -1286,6 +1286,14 @@ class Application(Generic[BT, CCT, UD, CD, BD, JQ], AsyncContextManager["Applica
         for handlers in self.handlers.values():
             try:
                 for handler in handlers:
+                    if need_atom_process(handler):
+                        processed, context, _cur_blocking = await handler.do_process_atom(  # type: ignore
+                            context, update, self
+                        )
+                        if processed:
+                            any_blocking |= _cur_blocking
+                            break
+                        continue
                     check = handler.check_update(update)  # Should the handler handle this update?
                     if check is None or check is False:
                         continue
@@ -1305,6 +1313,10 @@ class Application(Generic[BT, CCT, UD, CD, BD, JQ], AsyncContextManager["Applica
                             return
                         await context.refresh_data()
                     coroutine: Coroutine = handler.handle_update(update, self, check, context)
+
+                    if await self.do_process_update(handler, update, coroutine):
+                        any_blocking = True
+                    break  # Only a max of 1 handler per group is handled
 
                     if not handler.block or (  # if handler is running with block=False,
                         handler.block is DEFAULT_TRUE
@@ -1341,6 +1353,41 @@ class Application(Generic[BT, CCT, UD, CD, BD, JQ], AsyncContextManager["Applica
             # blocking handler - the non-blocking handlers mark the update again when finished
             # (in __create_task_callback)
             self._mark_for_persistence_update(update=update)
+
+    async def do_process_update(
+        self, handler: BaseHandler[Any, CCT], update: object, coroutine: Coroutine
+    ) -> bool:
+        """Called by a handle to truely process an update.
+
+        Args:
+            handler (:class:`telegram.ext.BaseHandler`): The handler that be responsible for
+                this update.
+            update (:class:`telegram.Update` | :obj:`object` | \
+                :class:`telegram.error.TelegramError`): The update to process.
+            coroutine (:obj:`Coroutine`): The task that to be processed.
+
+        Returns:
+            :obj:`bool`: Whether the handling process is blocking.
+
+        """
+        if not handler.block or (  # if handler is running with block=False,
+            handler.block is DEFAULT_TRUE
+            and isinstance(self.bot, ExtBot)
+            and self.bot.defaults
+            and not self.bot.defaults.block
+        ):
+            self.create_task(
+                coroutine,
+                update=update,
+                name=(
+                    f"Application:{self.bot.id}:process_update_non_blocking"
+                    f":{handler}"
+                ),
+            )
+            return False
+        else:
+            await coroutine
+            return True
 
     def add_handler(self, handler: BaseHandler[Any, CCT], group: int = DEFAULT_GROUP) -> None:
         """Register a handler.
