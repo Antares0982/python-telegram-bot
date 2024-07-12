@@ -26,7 +26,7 @@ Setting things up
 
    .. code-block:: bash
 
-      $ pip install -r requirements-all.txt
+      $ pip install -r requirements-dev-all.txt
 
 
 5. Install pre-commit hooks:
@@ -194,7 +194,7 @@ Feel free to copy (parts of) the checklist to the PR description to remind you o
    - Added or updated documentation for the changed class(es) and/or method(s)
    - Added the new method(s) to ``_extbot.py``
    - Added or updated ``bot_methods.rst``
-   - Updated the Bot API version number in all places: ``README.rst`` and ``README_RAW.rst`` (including the badge), as well as ``telegram.constants.BOT_API_VERSION_INFO``
+   - Updated the Bot API version number in all places: ``README.rst`` (including the badge) and ``telegram.constants.BOT_API_VERSION_INFO``
    - Added logic for arbitrary callback data in :class:`telegram.ext.ExtBot` for new methods that either accept a ``reply_markup`` in some form or have a return type that is/contains :class:`~telegram.Message`
 
 Documenting
@@ -210,13 +210,8 @@ doc strings don't have a separate documentation site they generate, instead, the
 
 User facing documentation
 -------------------------
-We use `sphinx`_ to generate static HTML docs. To build them, first make sure you're running Python 3.9 or above and have the required dependencies:
-
-.. code-block:: bash
-
-   $ pip install -r docs/requirements-docs.txt
-
-then run the following from the PTB root directory:
+We use `sphinx`_ to generate static HTML docs. To build them, first make sure you're running Python 3.9 or above and have the required dependencies installed as explained above.
+Then, run the following from the PTB root directory:
 
 .. code-block:: bash
 

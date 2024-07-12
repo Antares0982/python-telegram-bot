@@ -251,39 +251,44 @@ class Application(Generic[BT, CCT, UD, CD, BD, JQ], AsyncContextManager["Applica
     """
 
     __slots__ = (
-        "__create_task_tasks",
-        "__update_fetcher_task",
-        "__update_persistence_event",
-        "__update_persistence_lock",
-        "__update_persistence_task",
+        (  # noqa: RUF005
+            "__create_task_tasks",
+            "__update_fetcher_task",
+            "__update_persistence_event",
+            "__update_persistence_lock",
+            "__update_persistence_task",
+            "__stop_running_marker",
+            "_chat_data",
+            "_chat_ids_to_be_deleted_in_persistence",
+            "_chat_ids_to_be_updated_in_persistence",
+            "_conversation_handler_conversations",
+            "_initialized",
+            "_job_queue",
+            "_running",
+            "_update_processor",
+            "_user_data",
+            "_user_ids_to_be_deleted_in_persistence",
+            "_user_ids_to_be_updated_in_persistence",
+            "bot",
+            "bot_data",
+            "chat_data",
+            "context_types",
+            "error_handlers",
+            "handlers",
+            "persistence",
+            "post_init",
+            "post_shutdown",
+            "post_stop",
+            "update_queue",
+            "updater",
+            "user_data",
+        )
         # Allowing '__weakref__' creation here since we need it for the JobQueue
-        # Uncomment if necessary - currently the __weakref__ slot is already created
-        # in the AsyncContextManager base class
-        # "__weakref__",
-        "_chat_data",
-        "_chat_ids_to_be_deleted_in_persistence",
-        "_chat_ids_to_be_updated_in_persistence",
-        "_conversation_handler_conversations",
-        "_initialized",
-        "_job_queue",
-        "_running",
-        "_update_processor",
-        "_user_data",
-        "_user_ids_to_be_deleted_in_persistence",
-        "_user_ids_to_be_updated_in_persistence",
-        "bot",
-        "bot_data",
-        "chat_data",
-        "context_types",
-        "error_handlers",
-        "handlers",
-        "persistence",
-        "post_init",
-        "post_shutdown",
-        "post_stop",
-        "update_queue",
-        "updater",
-        "user_data",
+        # Currently the __weakref__ slot is already created
+        # in the AsyncContextManager base class for pythons < 3.13
+        + ("__weakref__",)
+        if sys.version_info >= (3, 13)
+        else ()
     )
 
     def __init__(
@@ -780,6 +785,11 @@ class Application(Generic[BT, CCT, UD, CD, BD, JQ], AsyncContextManager["Applica
         - :meth:`post_stop`
         - :meth:`shutdown`
         - :meth:`post_shutdown`
+
+        A small wrapper is passed to :paramref:`telegram.ext.Updater.start_polling.error_callback`
+        which forwards errors occurring during polling to
+        :meth:`registered error handlers <add_error_handler>`. The update parameter of the callback
+        will be set to :obj:`None`.
 
         .. include:: inclusions/application_run_tip.rst
 
@@ -1404,11 +1414,11 @@ class Application(Generic[BT, CCT, UD, CD, BD, JQ], AsyncContextManager["Applica
 
         The priority/order of handlers is determined as follows:
 
-          * Priority of the group (lower group number == higher priority)
-          * The first handler in a group which can handle an update (see
-            :attr:`telegram.ext.BaseHandler.check_update`) will be used. Other handlers from the
-            group will not be used. The order in which handlers were added to the group defines the
-            priority.
+        * Priority of the group (lower group number == higher priority)
+        * The first handler in a group which can handle an update (see
+          :attr:`telegram.ext.BaseHandler.check_update`) will be used. Other handlers from the
+          group will not be used. The order in which handlers were added to the group defines the
+          priority.
 
         Warning:
             Adding persistent :class:`telegram.ext.ConversationHandler` after the application has
