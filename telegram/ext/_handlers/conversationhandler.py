@@ -960,9 +960,9 @@ class ConversationHandlerEx(ConversationHandler[CCT]):
     # signatures of __init__ should be the same
     def __init__(
         self,
-        entry_points: List[BaseHandler[Update, CCT]],
-        states: Dict[object, List[BaseHandler[Update, CCT]]],
-        fallbacks: List[BaseHandler[Update, CCT]],
+        entry_points: List[BaseHandler[Update, CCT, object]],
+        states: Dict[object, List[BaseHandler[Update, CCT, object]]],
+        fallbacks: List[BaseHandler[Update, CCT, object]],
         allow_reentry: bool = False,
         per_chat: bool = True,
         per_user: bool = True,
