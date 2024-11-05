@@ -1365,7 +1365,7 @@ class Application(Generic[BT, CCT, UD, CD, BD, JQ], AsyncContextManager["Applica
             self._mark_for_persistence_update(update=update)
 
     async def do_process_update(
-        self, handler: BaseHandler[Any, CCT], update: object, coroutine: Coroutine
+        self, handler: BaseHandler[Any, CCT, Any], update: object, coroutine: Coroutine
     ) -> bool:
         """Called by a handle to truely process an update.
 
