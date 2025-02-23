@@ -1,5 +1,5 @@
-pkgs: pypkgs: with pypkgs;
-[
+{ pkgs, ... }:
+pypkgs: with pypkgs; [
   # pre-commit
   setuptools
   pytest
@@ -15,5 +15,7 @@ pkgs: pypkgs: with pypkgs;
   cachetools
   APScheduler
   pytz
+  build
+  twine
   # add packages here
 ]
