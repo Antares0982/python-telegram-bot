@@ -965,7 +965,7 @@ class ConversationHandlerEx(ConversationHandler[CCT]):
         per_chat: bool = True,
         per_user: bool = True,
         per_message: bool = False,
-        conversation_timeout: Optional[Union[float, datetime.timedelta]] = None,
+        conversation_timeout: Optional[Union[float, dtm.timedelta]] = None,
         name: Optional[str] = None,
         persistent: bool = False,
         map_to_parent: Optional[Dict[object, object]] = None,
