@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
 # A library that provides a Python interface to the Telegram Bot API
-# Copyright (C) 2015-2024
+# Copyright (C) 2015-2025
 # Leandro Toledo de Souza <devs@python-telegram-bot.org>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@
 # along with this program.  If not, see [http://www.gnu.org/licenses/].
 """Base class for Telegram Objects."""
 import contextlib
-import datetime
+import datetime as dtm
 import inspect
 import json
 from collections.abc import Iterator, Mapping, Sized
@@ -634,9 +634,9 @@ class TelegramObject:
                         val.append(item)
                 out[key] = val
 
-            elif isinstance(value, datetime.datetime):
+            elif isinstance(value, dtm.datetime):
                 out[key] = to_timestamp(value)
-            elif isinstance(value, datetime.timedelta):
+            elif isinstance(value, dtm.timedelta):
                 out[key] = value.total_seconds()
 
         for key in pop_keys:

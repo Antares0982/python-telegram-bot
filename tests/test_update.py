@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
 # A library that provides a Python interface to the Telegram Bot API
-# Copyright (C) 2015-2024
+# Copyright (C) 2015-2025
 # Leandro Toledo de Souza <devs@python-telegram-bot.org>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -16,9 +16,9 @@
 #
 # You should have received a copy of the GNU Lesser Public License
 # along with this program.  If not, see [http://www.gnu.org/licenses/].
+import datetime as dtm
 import time
 from copy import deepcopy
-from datetime import datetime
 
 import pytest
 
@@ -57,7 +57,7 @@ from tests.auxil.slots import mro_slots
 
 message = Message(
     1,
-    datetime.utcnow(),
+    dtm.datetime.utcnow(),
     Chat(1, ""),
     from_user=User(1, "", False),
     text="Text",
@@ -65,7 +65,7 @@ message = Message(
 )
 channel_post = Message(
     1,
-    datetime.utcnow(),
+    dtm.datetime.utcnow(),
     Chat(1, ""),
     text="Text",
     sender_chat=Chat(1, ""),
@@ -139,7 +139,7 @@ deleted_business_messages = BusinessMessagesDeleted(
 
 business_message = Message(
     1,
-    datetime.utcnow(),
+    dtm.datetime.utcnow(),
     Chat(1, ""),
     User(1, "", False),
 )

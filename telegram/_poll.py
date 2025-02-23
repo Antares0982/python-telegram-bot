@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
 # A library that provides a Python interface to the Telegram Bot API
-# Copyright (C) 2015-2024
+# Copyright (C) 2015-2025
 # Leandro Toledo de Souza <devs@python-telegram-bot.org>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU Lesser Public License
 # along with this program.  If not, see [http://www.gnu.org/licenses/].
 """This module contains an object that represents a Telegram Poll."""
-import datetime
+import datetime as dtm
 from collections.abc import Sequence
 from typing import TYPE_CHECKING, Final, Optional
 
@@ -446,7 +446,7 @@ class Poll(TelegramObject):
         explanation: Optional[str] = None,
         explanation_entities: Optional[Sequence[MessageEntity]] = None,
         open_period: Optional[int] = None,
-        close_date: Optional[datetime.datetime] = None,
+        close_date: Optional[dtm.datetime] = None,
         question_entities: Optional[Sequence[MessageEntity]] = None,
         *,
         api_kwargs: Optional[JSONDict] = None,
@@ -466,7 +466,7 @@ class Poll(TelegramObject):
             explanation_entities
         )
         self.open_period: Optional[int] = open_period
-        self.close_date: Optional[datetime.datetime] = close_date
+        self.close_date: Optional[dtm.datetime] = close_date
         self.question_entities: tuple[MessageEntity, ...] = parse_sequence_arg(question_entities)
 
         self._id_attrs = (self.id,)

@@ -2,7 +2,7 @@
 # pylint: disable=redefined-builtin
 #
 # A library that provides a Python interface to the Telegram Bot API
-# Copyright (C) 2015-2024
+# Copyright (C) 2015-2025
 # Leandro Toledo de Souza <devs@python-telegram-bot.org>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -18,8 +18,8 @@
 # You should have received a copy of the GNU Lesser Public License
 # along with this program.  If not, see [http://www.gnu.org/licenses/].
 """This module contains an object that represents a Telegram ChatFullInfo."""
+import datetime as dtm
 from collections.abc import Sequence
-from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 
 from telegram._birthdate import Birthdate
@@ -422,7 +422,7 @@ class ChatFullInfo(_ChatBase):
         profile_accent_color_id: Optional[int] = None,
         profile_background_custom_emoji_id: Optional[str] = None,
         emoji_status_custom_emoji_id: Optional[str] = None,
-        emoji_status_expiration_date: Optional[datetime] = None,
+        emoji_status_expiration_date: Optional[dtm.datetime] = None,
         bio: Optional[str] = None,
         has_private_forwards: Optional[bool] = None,
         has_restricted_voice_and_video_messages: Optional[bool] = None,
@@ -486,7 +486,9 @@ class ChatFullInfo(_ChatBase):
             )
             self.active_usernames: tuple[str, ...] = parse_sequence_arg(active_usernames)
             self.emoji_status_custom_emoji_id: Optional[str] = emoji_status_custom_emoji_id
-            self.emoji_status_expiration_date: Optional[datetime] = emoji_status_expiration_date
+            self.emoji_status_expiration_date: Optional[dtm.datetime] = (
+                emoji_status_expiration_date
+            )
             self.has_aggressive_anti_spam_enabled: Optional[bool] = (
                 has_aggressive_anti_spam_enabled
             )
