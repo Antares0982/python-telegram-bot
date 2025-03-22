@@ -204,7 +204,6 @@ class TestInputInvoiceMessageContentWithoutRequest(InputInvoiceMessageContentTes
         )
 
     def test_de_json(self, offline_bot):
-        assert InputInvoiceMessageContent.de_json({}, bot=offline_bot) is None
 
         json_dict = {
             "title": self.title,
@@ -283,10 +282,10 @@ class TestInputInvoiceMessageContentWithoutRequest(InputInvoiceMessageContentTes
             self.title,
             self.description,
             self.payload,
-            self.provider_token,
             self.currency,
             # the first prices amount & the second lebal changed
             [LabeledPrice("label1", 24), LabeledPrice("label22", 314)],
+            self.provider_token,
         )
         d = InputInvoiceMessageContent(
             self.title,

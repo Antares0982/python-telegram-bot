@@ -7,6 +7,8 @@ on:
     paths:
       - .github/workflows/docs-linkcheck.yml
 
+permissions: {}
+
 jobs:
   test-sphinx-build:
     name: test-sphinx-linkcheck
@@ -21,7 +23,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+        uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5.4.0
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
@@ -30,3 +32,10 @@ jobs:
           python -W ignore -m pip install -r requirements-dev-all.txt
       - name: Check Links
         run: sphinx-build docs/source docs/build/html -W --keep-going -j auto -b linkcheck
+      - name: Upload linkcheck output
+        # Run also if the previous steps failed
+        if: always()
+        uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.5.0
+        with:
+          name: linkcheck-output
+          path: docs/build/html/output.*

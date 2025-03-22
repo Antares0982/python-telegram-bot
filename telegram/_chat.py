@@ -31,7 +31,14 @@ from telegram._reaction import ReactionType
 from telegram._telegramobject import TelegramObject
 from telegram._utils import enum
 from telegram._utils.defaultvalue import DEFAULT_NONE
-from telegram._utils.types import CorrectOptionID, FileInput, JSONDict, ODVInput, ReplyMarkup
+from telegram._utils.types import (
+    CorrectOptionID,
+    FileInput,
+    JSONDict,
+    ODVInput,
+    ReplyMarkup,
+    TimePeriod,
+)
 from telegram.helpers import escape_markdown
 from telegram.helpers import mention_html as helpers_mention_html
 from telegram.helpers import mention_markdown as helpers_mention_markdown
@@ -1339,7 +1346,7 @@ class _ChatBase(TelegramObject):
     async def send_audio(
         self,
         audio: Union[FileInput, "Audio"],
-        duration: Optional[int] = None,
+        duration: Optional[TimePeriod] = None,
         performer: Optional[str] = None,
         title: Optional[str] = None,
         caption: Optional[str] = None,
@@ -1569,9 +1576,9 @@ class _ChatBase(TelegramObject):
         title: str,
         description: str,
         payload: str,
-        provider_token: Optional[str],
         currency: str,
         prices: Sequence["LabeledPrice"],
+        provider_token: Optional[str] = None,
         start_parameter: Optional[str] = None,
         photo_url: Optional[str] = None,
         photo_size: Optional[int] = None,
@@ -1668,7 +1675,7 @@ class _ChatBase(TelegramObject):
         longitude: Optional[float] = None,
         disable_notification: ODVInput[bool] = DEFAULT_NONE,
         reply_markup: Optional[ReplyMarkup] = None,
-        live_period: Optional[int] = None,
+        live_period: Optional[TimePeriod] = None,
         horizontal_accuracy: Optional[float] = None,
         heading: Optional[int] = None,
         proximity_alert_radius: Optional[int] = None,
@@ -1727,7 +1734,7 @@ class _ChatBase(TelegramObject):
     async def send_animation(
         self,
         animation: Union[FileInput, "Animation"],
-        duration: Optional[int] = None,
+        duration: Optional[TimePeriod] = None,
         width: Optional[int] = None,
         height: Optional[int] = None,
         caption: Optional[str] = None,
@@ -1915,7 +1922,7 @@ class _ChatBase(TelegramObject):
     async def send_video(
         self,
         video: Union[FileInput, "Video"],
-        duration: Optional[int] = None,
+        duration: Optional[TimePeriod] = None,
         caption: Optional[str] = None,
         disable_notification: ODVInput[bool] = DEFAULT_NONE,
         reply_markup: Optional[ReplyMarkup] = None,
@@ -1933,6 +1940,8 @@ class _ChatBase(TelegramObject):
         message_effect_id: Optional[str] = None,
         allow_paid_broadcast: Optional[bool] = None,
         show_caption_above_media: Optional[bool] = None,
+        cover: Optional[FileInput] = None,
+        start_timestamp: Optional[int] = None,
         *,
         reply_to_message_id: Optional[int] = None,
         allow_sending_without_reply: ODVInput[bool] = DEFAULT_NONE,
@@ -1971,6 +1980,8 @@ class _ChatBase(TelegramObject):
             parse_mode=parse_mode,
             supports_streaming=supports_streaming,
             thumbnail=thumbnail,
+            cover=cover,
+            start_timestamp=start_timestamp,
             api_kwargs=api_kwargs,
             allow_sending_without_reply=allow_sending_without_reply,
             caption_entities=caption_entities,
@@ -1987,7 +1998,7 @@ class _ChatBase(TelegramObject):
     async def send_video_note(
         self,
         video_note: Union[FileInput, "VideoNote"],
-        duration: Optional[int] = None,
+        duration: Optional[TimePeriod] = None,
         length: Optional[int] = None,
         disable_notification: ODVInput[bool] = DEFAULT_NONE,
         reply_markup: Optional[ReplyMarkup] = None,
@@ -2045,7 +2056,7 @@ class _ChatBase(TelegramObject):
     async def send_voice(
         self,
         voice: Union[FileInput, "Voice"],
-        duration: Optional[int] = None,
+        duration: Optional[TimePeriod] = None,
         caption: Optional[str] = None,
         disable_notification: ODVInput[bool] = DEFAULT_NONE,
         reply_markup: Optional[ReplyMarkup] = None,
@@ -2115,7 +2126,7 @@ class _ChatBase(TelegramObject):
         reply_markup: Optional[ReplyMarkup] = None,
         explanation: Optional[str] = None,
         explanation_parse_mode: ODVInput[str] = DEFAULT_NONE,
-        open_period: Optional[int] = None,
+        open_period: Optional[TimePeriod] = None,
         close_date: Optional[Union[int, dtm.datetime]] = None,
         explanation_entities: Optional[Sequence["MessageEntity"]] = None,
         protect_content: ODVInput[bool] = DEFAULT_NONE,
@@ -2192,6 +2203,7 @@ class _ChatBase(TelegramObject):
         reply_parameters: Optional["ReplyParameters"] = None,
         show_caption_above_media: Optional[bool] = None,
         allow_paid_broadcast: Optional[bool] = None,
+        video_start_timestamp: Optional[int] = None,
         *,
         reply_to_message_id: Optional[int] = None,
         allow_sending_without_reply: ODVInput[bool] = DEFAULT_NONE,
@@ -2218,6 +2230,7 @@ class _ChatBase(TelegramObject):
             from_chat_id=from_chat_id,
             message_id=message_id,
             caption=caption,
+            video_start_timestamp=video_start_timestamp,
             parse_mode=parse_mode,
             caption_entities=caption_entities,
             disable_notification=disable_notification,
@@ -2250,6 +2263,7 @@ class _ChatBase(TelegramObject):
         reply_parameters: Optional["ReplyParameters"] = None,
         show_caption_above_media: Optional[bool] = None,
         allow_paid_broadcast: Optional[bool] = None,
+        video_start_timestamp: Optional[int] = None,
         *,
         reply_to_message_id: Optional[int] = None,
         allow_sending_without_reply: ODVInput[bool] = DEFAULT_NONE,
@@ -2276,6 +2290,7 @@ class _ChatBase(TelegramObject):
             chat_id=chat_id,
             message_id=message_id,
             caption=caption,
+            video_start_timestamp=video_start_timestamp,
             parse_mode=parse_mode,
             caption_entities=caption_entities,
             disable_notification=disable_notification,
@@ -2391,6 +2406,7 @@ class _ChatBase(TelegramObject):
         disable_notification: ODVInput[bool] = DEFAULT_NONE,
         protect_content: ODVInput[bool] = DEFAULT_NONE,
         message_thread_id: Optional[int] = None,
+        video_start_timestamp: Optional[int] = None,
         *,
         read_timeout: ODVInput[float] = DEFAULT_NONE,
         write_timeout: ODVInput[float] = DEFAULT_NONE,
@@ -2416,6 +2432,7 @@ class _ChatBase(TelegramObject):
             chat_id=self.id,
             from_chat_id=from_chat_id,
             message_id=message_id,
+            video_start_timestamp=video_start_timestamp,
             disable_notification=disable_notification,
             read_timeout=read_timeout,
             write_timeout=write_timeout,
@@ -2433,6 +2450,7 @@ class _ChatBase(TelegramObject):
         disable_notification: ODVInput[bool] = DEFAULT_NONE,
         protect_content: ODVInput[bool] = DEFAULT_NONE,
         message_thread_id: Optional[int] = None,
+        video_start_timestamp: Optional[int] = None,
         *,
         read_timeout: ODVInput[float] = DEFAULT_NONE,
         write_timeout: ODVInput[float] = DEFAULT_NONE,
@@ -2459,6 +2477,7 @@ class _ChatBase(TelegramObject):
             from_chat_id=self.id,
             chat_id=chat_id,
             message_id=message_id,
+            video_start_timestamp=video_start_timestamp,
             disable_notification=disable_notification,
             read_timeout=read_timeout,
             write_timeout=write_timeout,
@@ -2708,7 +2727,7 @@ class _ChatBase(TelegramObject):
 
     async def create_subscription_invite_link(
         self,
-        subscription_period: int,
+        subscription_period: TimePeriod,
         subscription_price: int,
         name: Optional[str] = None,
         *,
@@ -3455,18 +3474,25 @@ class _ChatBase(TelegramObject):
 
              await bot.send_gift(user_id=update.effective_chat.id, *args, **kwargs )
 
+        or::
+
+            await bot.send_gift(chat_id=update.effective_chat.id, *args, **kwargs )
+
         For the documentation of the arguments, please see :meth:`telegram.Bot.send_gift`.
 
         Caution:
-            Can only work, if the chat is a private chat, see :attr:`type`.
+            Will only work if the chat is a private or channel chat, see :attr:`type`.
 
         .. versionadded:: 21.8
+
+        .. versionchanged:: 21.11
+
+            Added support for channel chats.
 
         Returns:
             :obj:`bool`: On success, :obj:`True` is returned.
         """
         return await self.get_bot().send_gift(
-            user_id=self.id,
             gift_id=gift_id,
             text=text,
             text_parse_mode=text_parse_mode,
@@ -3477,6 +3503,7 @@ class _ChatBase(TelegramObject):
             connect_timeout=connect_timeout,
             pool_timeout=pool_timeout,
             api_kwargs=api_kwargs,
+            **{"chat_id" if self.type == Chat.CHANNEL else "user_id": self.id},
         )
 
     async def verify(

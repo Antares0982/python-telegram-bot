@@ -80,8 +80,6 @@ class TestGiftWithoutRequest(GiftTestBase):
         assert gift.remaining_count == self.remaining_count
         assert gift.upgrade_star_count == self.upgrade_star_count
 
-        assert Gift.de_json(None, offline_bot) is None
-
     def test_to_dict(self, gift):
         gift_dict = gift.to_dict()
 
@@ -165,6 +163,43 @@ class TestGiftWithoutRequest(GiftTestBase):
             text_entities=text_entities,
             pay_for_upgrade=True,
         )
+
+    @pytest.mark.parametrize("id_name", ["user_id", "chat_id"])
+    async def test_send_gift_user_chat_id(self, offline_bot, gift, monkeypatch, id_name):
+        # Only here because we have to temporarily mark gift_id as optional.
+        # tags: deprecated 21.11
+
+        # We can't send actual gifts, so we just check that the correct parameters are passed
+        text_entities = [
+            MessageEntity(MessageEntity.TEXT_LINK, 0, 4, "url"),
+            MessageEntity(MessageEntity.BOLD, 5, 9),
+        ]
+
+        async def make_assertion(url, request_data: RequestData, *args, **kwargs):
+            received_id = request_data.parameters[id_name] == id_name
+            gift_id = request_data.parameters["gift_id"] == "some_id"
+            text = request_data.parameters["text"] == "text"
+            text_parse_mode = request_data.parameters["text_parse_mode"] == "text_parse_mode"
+            tes = request_data.parameters["text_entities"] == [
+                me.to_dict() for me in text_entities
+            ]
+            pay_for_upgrade = request_data.parameters["pay_for_upgrade"] is True
+
+            return received_id and gift_id and text and text_parse_mode and tes and pay_for_upgrade
+
+        monkeypatch.setattr(offline_bot.request, "post", make_assertion)
+        assert await offline_bot.send_gift(
+            gift_id=gift,
+            text="text",
+            text_parse_mode="text_parse_mode",
+            text_entities=text_entities,
+            pay_for_upgrade=True,
+            **{id_name: id_name},
+        )
+
+    async def test_send_gift_without_gift_id(self, offline_bot):
+        with pytest.raises(TypeError, match="Missing required argument `gift_id`."):
+            await offline_bot.send_gift()
 
     @pytest.mark.parametrize("default_bot", [{"parse_mode": "Markdown"}], indirect=True)
     @pytest.mark.parametrize(
@@ -265,8 +300,6 @@ class TestGiftsWithoutRequest(GiftsTestBase):
             assert de_json_gift.total_count == original_gift.total_count
             assert de_json_gift.remaining_count == original_gift.remaining_count
             assert de_json_gift.upgrade_star_count == original_gift.upgrade_star_count
-
-        assert Gifts.de_json(None, offline_bot) is None
 
     def test_to_dict(self, gifts):
         gifts_dict = gifts.to_dict()

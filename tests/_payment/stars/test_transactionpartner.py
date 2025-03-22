@@ -22,12 +22,14 @@ import pytest
 
 from telegram import (
     AffiliateInfo,
+    Chat,
     Gift,
     PaidMediaVideo,
     RevenueWithdrawalStatePending,
     Sticker,
     TransactionPartner,
     TransactionPartnerAffiliateProgram,
+    TransactionPartnerChat,
     TransactionPartnerFragment,
     TransactionPartnerOther,
     TransactionPartnerTelegramAds,
@@ -95,6 +97,10 @@ class TransactionPartnerTestBase:
         amount=42,
     )
     request_count = 42
+    chat = Chat(
+        id=3,
+        type=Chat.CHANNEL,
+    )
 
 
 class TestTransactionPartnerWithoutRequest(TransactionPartnerTestBase):
@@ -114,9 +120,6 @@ class TestTransactionPartnerWithoutRequest(TransactionPartnerTestBase):
         assert transaction_partner.api_kwargs == {}
         assert transaction_partner.type == "unknown"
 
-        assert TransactionPartner.de_json(None, offline_bot) is None
-        assert TransactionPartner.de_json({}, offline_bot) is None
-
     @pytest.mark.parametrize(
         ("tp_type", "subclass"),
         [
@@ -126,6 +129,7 @@ class TestTransactionPartnerWithoutRequest(TransactionPartnerTestBase):
             ("telegram_ads", TransactionPartnerTelegramAds),
             ("telegram_api", TransactionPartnerTelegramApi),
             ("other", TransactionPartnerOther),
+            ("chat", TransactionPartnerChat),
         ],
     )
     def test_subclass(self, offline_bot, tp_type, subclass):
@@ -191,9 +195,6 @@ class TestTransactionPartnerAffiliateProgramWithoutRequest(TransactionPartnerTes
         assert tp.commission_per_mille == self.commission_per_mille
         assert tp.sponsor_user == self.sponsor_user
 
-        assert TransactionPartnerAffiliateProgram.de_json(None, offline_bot) is None
-        assert TransactionPartnerAffiliateProgram.de_json({}, offline_bot) is None
-
     def test_to_dict(self, transaction_partner_affiliate_program):
         json_dict = transaction_partner_affiliate_program.to_dict()
         assert json_dict["type"] == self.type
@@ -242,8 +243,6 @@ class TestTransactionPartnerFragmentWithoutRequest(TransactionPartnerTestBase):
         assert tp.api_kwargs == {}
         assert tp.type == "fragment"
         assert tp.withdrawal_state == self.withdrawal_state
-
-        assert TransactionPartnerFragment.de_json(None, offline_bot) is None
 
     def test_to_dict(self, transaction_partner_fragment):
         json_dict = transaction_partner_fragment.to_dict()
@@ -303,9 +302,6 @@ class TestTransactionPartnerUserWithoutRequest(TransactionPartnerTestBase):
         assert tp.paid_media_payload == self.paid_media_payload
         assert tp.subscription_period == self.subscription_period
 
-        assert TransactionPartnerUser.de_json(None, offline_bot) is None
-        assert TransactionPartnerUser.de_json({}, offline_bot) is None
-
     def test_to_dict(self, transaction_partner_user):
         json_dict = transaction_partner_user.to_dict()
         assert json_dict["type"] == self.type
@@ -355,8 +351,6 @@ class TestTransactionPartnerOtherWithoutRequest(TransactionPartnerTestBase):
         assert tp.api_kwargs == {}
         assert tp.type == "other"
 
-        assert TransactionPartnerOther.de_json(None, offline_bot) is None
-
     def test_to_dict(self, transaction_partner_other):
         json_dict = transaction_partner_other.to_dict()
         assert json_dict == {"type": self.type}
@@ -396,8 +390,6 @@ class TestTransactionPartnerTelegramAdsWithoutRequest(TransactionPartnerTestBase
         tp = TransactionPartnerTelegramAds.de_json(json_dict, offline_bot)
         assert tp.api_kwargs == {}
         assert tp.type == "telegram_ads"
-
-        assert TransactionPartnerTelegramAds.de_json(None, offline_bot) is None
 
     def test_to_dict(self, transaction_partner_telegram_ads):
         json_dict = transaction_partner_telegram_ads.to_dict()
@@ -442,8 +434,6 @@ class TestTransactionPartnerTelegramApiWithoutRequest(TransactionPartnerTestBase
         assert tp.type == "telegram_api"
         assert tp.request_count == self.request_count
 
-        assert TransactionPartnerTelegramApi.de_json(None, offline_bot) is None
-
     def test_to_dict(self, transaction_partner_telegram_api):
         json_dict = transaction_partner_telegram_api.to_dict()
         assert json_dict["type"] == self.type
@@ -458,6 +448,61 @@ class TestTransactionPartnerTelegramApiWithoutRequest(TransactionPartnerTestBase
             request_count=0,
         )
         d = User(id=1, is_bot=False, first_name="user", last_name="user")
+
+        assert a == b
+        assert hash(a) == hash(b)
+
+        assert a != c
+        assert hash(a) != hash(c)
+
+        assert a != d
+        assert hash(a) != hash(d)
+
+
+@pytest.fixture
+def transaction_partner_chat():
+    return TransactionPartnerChat(
+        chat=TransactionPartnerTestBase.chat,
+        gift=TransactionPartnerTestBase.gift,
+    )
+
+
+class TestTransactionPartnerChatWithoutRequest(TransactionPartnerTestBase):
+    type = TransactionPartnerType.CHAT
+
+    def test_slot_behaviour(self, transaction_partner_chat):
+        inst = transaction_partner_chat
+        for attr in inst.__slots__:
+            assert getattr(inst, attr, "err") != "err", f"got extra slot '{attr}'"
+        assert len(mro_slots(inst)) == len(set(mro_slots(inst))), "duplicate slot"
+
+    def test_de_json(self, offline_bot):
+        json_dict = {
+            "chat": self.chat.to_dict(),
+            "gift": self.gift.to_dict(),
+        }
+        tp = TransactionPartnerChat.de_json(json_dict, offline_bot)
+        assert tp.api_kwargs == {}
+        assert tp.type == "chat"
+        assert tp.chat == self.chat
+        assert tp.gift == self.gift
+
+    def test_to_dict(self, transaction_partner_chat):
+        json_dict = transaction_partner_chat.to_dict()
+        assert json_dict["type"] == self.type
+        assert json_dict["chat"] == self.chat.to_dict()
+        assert json_dict["gift"] == self.gift.to_dict()
+
+    def test_equality(self, transaction_partner_chat):
+        a = transaction_partner_chat
+        b = TransactionPartnerChat(
+            chat=self.chat,
+            gift=self.gift,
+        )
+        c = TransactionPartnerChat(
+            chat=Chat(id=1, type=Chat.CHANNEL),
+        )
+        d = Chat(id=1, type=Chat.CHANNEL)
 
         assert a == b
         assert hash(a) == hash(b)

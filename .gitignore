@@ -69,6 +69,7 @@ docs/_build/
 # PyBuilder
 target/
 .idea/
+.run/
 
 # Sublime Text 2
 *.sublime*

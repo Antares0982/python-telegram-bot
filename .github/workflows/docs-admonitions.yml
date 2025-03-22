@@ -1,17 +1,23 @@
-name: Test Documentation Build
+name: Test Admonitions Generation
 on:
   pull_request:
     paths:
       - telegram/**
       - docs/**
+      - .github/workflows/docs-admonitions.yml
   push:
     branches:
       - master
 
+permissions: {}
+
 jobs:
-  test-sphinx-build:
-    name: test-sphinx-build
+  test-admonitions:
+    name: Test Admonitions Generation
     runs-on: ${{matrix.os}}
+    permissions:
+      # for uploading artifacts
+      actions: write
     strategy:
       matrix:
         python-version: ['3.10']
@@ -22,7 +28,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+        uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5.4.0
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
@@ -33,16 +39,3 @@ jobs:
           python -W ignore -m pip install -r requirements-dev-all.txt
       - name: Test autogeneration of admonitions
         run: pytest -v --tb=short tests/docs/admonition_inserter.py
-      - name: Build docs
-        run: sphinx-build docs/source docs/build/html -W --keep-going -j auto
-      - name: Upload docs
-        uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.5.0
-        with:
-          name: HTML Docs
-          retention-days: 7
-          path: |
-            # Exclude the .doctrees folder and .buildinfo file from the artifact
-            # since they are not needed and add to the size
-            docs/build/html/*
-            !docs/build/html/.doctrees
-            !docs/build/html/.buildinfo
