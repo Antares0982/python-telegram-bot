@@ -299,7 +299,12 @@ class ConversationHandler(BaseHandler[Update, CCT, object]):
         block: DVType[bool] = DEFAULT_TRUE,
     ):
         # these imports need to be here because of circular import error otherwise
-        from telegram.ext import PollAnswerHandler, PollHandler, PreCheckoutQueryHandler, ShippingQueryHandler  # pylint: disable=import-outside-toplevel
+        from telegram.ext import (  # pylint: disable=import-outside-toplevel  # noqa: PLC0415
+            PollAnswerHandler,
+            PollHandler,
+            PreCheckoutQueryHandler,
+            ShippingQueryHandler,
+        )
 
         # self.block is what the Application checks and we want it to always run CH in a blocking
         # way so that CH can take care of any non-blocking logic internally

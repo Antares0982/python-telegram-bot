@@ -455,7 +455,9 @@ class Application(
         .. versionadded:: 20.0
         """
         # Unfortunately this needs to be here due to cyclical imports
-        from telegram.ext import ApplicationBuilder  # pylint: disable=import-outside-toplevel
+        from telegram.ext import (  # noqa: PLC0415  # pylint: disable=import-outside-toplevel
+            ApplicationBuilder,
+        )
 
         return ApplicationBuilder()
 
@@ -498,7 +500,7 @@ class Application(
 
         # Unfortunately due to circular imports this has to be here
         # pylint: disable=import-outside-toplevel
-        from telegram.ext._handlers.conversationhandler import ConversationHandler
+        from telegram.ext._handlers.conversationhandler import ConversationHandler  # noqa: PLC0415
 
         # Initialize the persistent conversation handlers with the stored states
         for handler in itertools.chain.from_iterable(self.handlers.values()):
@@ -1416,7 +1418,7 @@ class Application(
         """
         # Unfortunately due to circular imports this has to be here
         # pylint: disable=import-outside-toplevel
-        from telegram.ext._handlers.conversationhandler import ConversationHandler
+        from telegram.ext._handlers.conversationhandler import ConversationHandler  # noqa: PLC0415
 
         if not isinstance(handler, BaseHandler):
             raise TypeError(f"handler is not an instance of {BaseHandler.__name__}")
@@ -1782,7 +1784,7 @@ class Application(
 
         # Unfortunately due to circular imports this has to be here
         # pylint: disable=import-outside-toplevel
-        from telegram.ext._handlers.conversationhandler import PendingState
+        from telegram.ext._handlers.conversationhandler import PendingState  # noqa: PLC0415
 
         for name, (key, new_state) in itertools.chain.from_iterable(
             zip(itertools.repeat(name), states_dict.pop_accessed_write_items())
