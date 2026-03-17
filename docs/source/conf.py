@@ -18,7 +18,7 @@ sys.path.insert(0, str(Path("../..").resolve().absolute()))
 # -- General configuration ------------------------------------------------
 # General information about the project.
 project = "python-telegram-bot"
-copyright = "2015-2025, Leandro Toledo"
+copyright = "2015-2026, Leandro Toledo"
 author = "Leandro Toledo"
 
 # The version info for the project you're documenting, acts as replacement for
@@ -126,6 +126,10 @@ linkcheck_ignore = [
     re.escape("https://docs.python-telegram-bot.org/en/doc-fixes"),
     # Apparently has some human-verification check and gives 403 in the sphinx build
     re.escape("https://stackoverflow.com/questions/tagged/python-telegram-bot"),
+    # Dead Github accounts:
+    re.escape("https://github.com/SmartDever02"),
+    re.escape("https://github.com/renovate[bot]"),
+    re.escape("https://github.com/roast-lord"),
 ]
 linkcheck_allowed_redirects = {
     # Redirects to the default version are okay

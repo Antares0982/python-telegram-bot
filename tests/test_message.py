@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
 # A library that provides a Python interface to the Telegram Bot API
-# Copyright (C) 2015-2025
+# Copyright (C) 2015-2026
 # Leandro Toledo de Souza <devs@python-telegram-bot.org>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -19,6 +19,7 @@
 
 import datetime as dtm
 from copy import copy, deepcopy
+from zoneinfo import ZoneInfo
 
 import pytest
 
@@ -30,6 +31,8 @@ from telegram import (
     Chat,
     ChatBackground,
     ChatBoostAdded,
+    ChatOwnerChanged,
+    ChatOwnerLeft,
     ChatShared,
     Checklist,
     ChecklistTask,
@@ -268,20 +271,21 @@ def message(bot):
         {
             "unique_gift": UniqueGiftInfo(
                 gift=UniqueGift(
-                    "human_readable_name",
-                    "unique_name",
-                    2,
-                    UniqueGiftModel(
+                    gift_id="gift_id",
+                    base_name="human_readable_name",
+                    name="unique_name",
+                    number=2,
+                    model=UniqueGiftModel(
                         "model_name",
                         Sticker("file_id1", "file_unique_id1", 512, 512, False, False, "regular"),
                         10,
                     ),
-                    UniqueGiftSymbol(
+                    symbol=UniqueGiftSymbol(
                         "symbol_name",
                         Sticker("file_id2", "file_unique_id2", 512, 512, True, True, "mask"),
                         20,
                     ),
-                    UniqueGiftBackdrop(
+                    backdrop=UniqueGiftBackdrop(
                         "backdrop_name",
                         UniqueGiftBackdropColors(0x00FF00, 0xEE00FF, 0xAA22BB, 0x20FE8F),
                         30,
@@ -420,6 +424,18 @@ def message(bot):
                 send_date=dtm.datetime.utcnow(),
             )
         },
+        {
+            "gift_upgrade_sent": GiftInfo(
+                gift=Gift(
+                    "gift_id",
+                    Sticker("file_id", "file_unique_id", 512, 512, False, False, "regular"),
+                    5,
+                )
+            )
+        },
+        {"chat_owner_changed": ChatOwnerChanged(new_owner=User(4, "Snow", False))},
+        {"chat_owner_left": ChatOwnerLeft(new_owner=User(5, "Crash", False))},
+        {"sender_tag": "This is a tag"},
     ],
     ids=[
         "reply",
@@ -510,6 +526,10 @@ def message(bot):
         "suggested_post_approved",
         "suggested_post_approval_failed",
         "suggested_post_info",
+        "gift_upgrade_sent",
+        "chat_owner_changed",
+        "chat_owner_left",
+        "sender_tag",
     ],
 )
 def message_params(bot, request):
@@ -568,11 +588,20 @@ class MessageTestBase:
         {"length": 34, "offset": 154, "type": "blockquote"},
         {"length": 6, "offset": 181, "type": "bold"},
         {"length": 33, "offset": 190, "type": "expandable_blockquote"},
+        {"length": 4, "offset": 224, "type": "date_time", "unix_time": dtm.datetime(2000, 7, 28)},
+        {
+            "length": 14,
+            "offset": 229,
+            "type": "date_time",
+            "unix_time": dtm.datetime(2000, 7, 28, tzinfo=ZoneInfo("Europe/Berlin")),
+            "date_time_format": "r",
+        },
     ]
     test_text_v2 = (
         r"Test for <bold, ita_lic, \`code, links, text-mention and `\pre. "
         "http://google.com and bold nested in strk>trgh nested in italic. Python pre. Spoiled. "
-        "👍.\nMultiline\nblock quote\nwith nested.\n\nMultiline\nexpandable\nblock quote."
+        "👍.\nMultiline\nblock quote\nwith nested.\n\nMultiline\nexpandable\nblock quote.\ntime"
+        "\ntime_formatted\n"
     )
     test_message = Message(
         message_id=1,
@@ -735,7 +764,8 @@ class TestMessageWithoutRequest(MessageTestBase):
             message_thread_id = await method(*args, message_thread_id=None)
             assert message_thread_id is None
 
-            if bot_method_name == "send_chat_action":
+            # These methods do not accept `do_quote` as passed below
+            if bot_method_name in ["send_chat_action", "send_message_draft"]:
                 return
 
             message_thread_id = await method(
@@ -939,7 +969,9 @@ class TestMessageWithoutRequest(MessageTestBase):
             '<span class="tg-spoiler">Spoiled</span>. '
             '<tg-emoji emoji-id="1">👍</tg-emoji>.\n'
             "<blockquote>Multiline\nblock quote\nwith <b>nested</b>.</blockquote>\n\n"
-            "<blockquote expandable>Multiline\nexpandable\nblock quote.</blockquote>"
+            "<blockquote expandable>Multiline\nexpandable\nblock quote.</blockquote>\n"
+            '<tg-time unix="964742400">time</tg-time>\n'
+            '<tg-time unix="964735200" format="r">time_formatted</tg-time>\n'
         )
         text_html = self.test_message_v2.text_html
         assert text_html == test_html_string
@@ -961,7 +993,9 @@ class TestMessageWithoutRequest(MessageTestBase):
             '<span class="tg-spoiler">Spoiled</span>. '
             '<tg-emoji emoji-id="1">👍</tg-emoji>.\n'
             "<blockquote>Multiline\nblock quote\nwith <b>nested</b>.</blockquote>\n\n"
-            "<blockquote expandable>Multiline\nexpandable\nblock quote.</blockquote>"
+            "<blockquote expandable>Multiline\nexpandable\nblock quote.</blockquote>\n"
+            '<tg-time unix="964742400">time</tg-time>\n'
+            '<tg-time unix="964735200" format="r">time_formatted</tg-time>\n'
         )
         text_html = self.test_message_v2.text_html_urled
         assert text_html == test_html_string
@@ -989,6 +1023,8 @@ class TestMessageWithoutRequest(MessageTestBase):
             "\n\n>Multiline\n"
             ">expandable\n"
             r">block quote\.||"
+            "\n![time](tg://time?unix=964742400)\n"
+            "![time\\_formatted](tg://time?unix=964735200&format=r)\n"
         )
         text_markdown = self.test_message_v2.text_markdown_v2
         assert text_markdown == test_md_string
@@ -1048,6 +1084,8 @@ class TestMessageWithoutRequest(MessageTestBase):
             "\n\n>Multiline\n"
             ">expandable\n"
             r">block quote\.||"
+            "\n![time](tg://time?unix=964742400)\n"
+            "![time\\_formatted](tg://time?unix=964735200&format=r)\n"
         )
         text_markdown = self.test_message_v2.text_markdown_v2_urled
         assert text_markdown == test_md_string
@@ -1165,7 +1203,9 @@ class TestMessageWithoutRequest(MessageTestBase):
             '<span class="tg-spoiler">Spoiled</span>. '
             '<tg-emoji emoji-id="1">👍</tg-emoji>.\n'
             "<blockquote>Multiline\nblock quote\nwith <b>nested</b>.</blockquote>\n\n"
-            "<blockquote expandable>Multiline\nexpandable\nblock quote.</blockquote>"
+            "<blockquote expandable>Multiline\nexpandable\nblock quote.</blockquote>\n"
+            '<tg-time unix="964742400">time</tg-time>\n'
+            '<tg-time unix="964735200" format="r">time_formatted</tg-time>\n'
         )
         caption_html = self.test_message_v2.caption_html
         assert caption_html == test_html_string
@@ -1187,7 +1227,9 @@ class TestMessageWithoutRequest(MessageTestBase):
             '<span class="tg-spoiler">Spoiled</span>. '
             '<tg-emoji emoji-id="1">👍</tg-emoji>.\n'
             "<blockquote>Multiline\nblock quote\nwith <b>nested</b>.</blockquote>\n\n"
-            "<blockquote expandable>Multiline\nexpandable\nblock quote.</blockquote>"
+            "<blockquote expandable>Multiline\nexpandable\nblock quote.</blockquote>\n"
+            '<tg-time unix="964742400">time</tg-time>\n'
+            '<tg-time unix="964735200" format="r">time_formatted</tg-time>\n'
         )
         caption_html = self.test_message_v2.caption_html_urled
         assert caption_html == test_html_string
@@ -1215,6 +1257,8 @@ class TestMessageWithoutRequest(MessageTestBase):
             "\n\n>Multiline\n"
             ">expandable\n"
             r">block quote\.||"
+            "\n![time](tg://time?unix=964742400)\n"
+            "![time\\_formatted](tg://time?unix=964735200&format=r)\n"
         )
         caption_markdown = self.test_message_v2.caption_markdown_v2
         assert caption_markdown == test_md_string
@@ -1249,6 +1293,8 @@ class TestMessageWithoutRequest(MessageTestBase):
             "\n\n>Multiline\n"
             ">expandable\n"
             r">block quote\.||"
+            "\n![time](tg://time?unix=964742400)\n"
+            "![time\\_formatted](tg://time?unix=964735200&format=r)\n"
         )
         caption_markdown = self.test_message_v2.caption_markdown_v2_urled
         assert caption_markdown == test_md_string
@@ -1728,6 +1774,8 @@ class TestMessageWithoutRequest(MessageTestBase):
             "\n\n>Multiline\n"
             ">expandable\n"
             r">block quote\.||"
+            "\n![time](tg://time?unix=964742400)\n"
+            "![time\\_formatted](tg://time?unix=964735200&format=r)\n"
         )
 
         async def make_assertion(*_, **kwargs):
@@ -1785,7 +1833,9 @@ class TestMessageWithoutRequest(MessageTestBase):
             '<span class="tg-spoiler">Spoiled</span>. '
             '<tg-emoji emoji-id="1">👍</tg-emoji>.\n'
             "<blockquote>Multiline\nblock quote\nwith <b>nested</b>.</blockquote>\n\n"
-            "<blockquote expandable>Multiline\nexpandable\nblock quote.</blockquote>"
+            "<blockquote expandable>Multiline\nexpandable\nblock quote.</blockquote>\n"
+            '<tg-time unix="964742400">time</tg-time>\n'
+            '<tg-time unix="964735200" format="r">time_formatted</tg-time>\n'
         )
 
         async def make_assertion(*_, **kwargs):
@@ -1829,6 +1879,37 @@ class TestMessageWithoutRequest(MessageTestBase):
 
         await self.check_thread_id_parsing(
             message, message.reply_html, "send_message", ["test"], monkeypatch
+        )
+
+    async def test_reply_text_draft(self, monkeypatch, message):
+        async def make_assertion(*_, **kwargs):
+            id_ = kwargs["chat_id"] == message.chat_id
+            text = kwargs["text"] == "test"
+            return id_ and text
+
+        assert check_shortcut_signature(
+            Message.reply_text_draft,
+            Bot.send_message_draft,
+            ["chat_id"],
+            [],
+            annotation_overrides={"message_thread_id": (ODVInput[int], DEFAULT_NONE)},
+        )
+        assert await check_shortcut_call(
+            message.reply_text_draft,
+            message.get_bot(),
+            "send_message_draft",
+            skip_params=[""],
+            shortcut_kwargs=["chat_id"],
+        )
+        assert await check_defaults_handling(
+            message.reply_text_draft, message.get_bot(), no_default_kwargs={"message_thread_id"}
+        )
+
+        monkeypatch.setattr(message.get_bot(), "send_message_draft", make_assertion)
+        assert await message.reply_text_draft(draft_id=1, text="test")
+
+        await self.check_thread_id_parsing(
+            message, message.reply_text_draft, "send_message_draft", [1, "test"], monkeypatch
         )
 
     async def test_reply_media_group(self, monkeypatch, message):

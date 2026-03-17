@@ -8,7 +8,7 @@ dynamic = ["version"]
 name = "antares-ptb"
 description = "A ptb fork for personal use only"
 readme = "long-desc-antares-ptb.rst"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = "LGPL-3.0-only"
 license-files = ["LICENSE", "LICENSE.dual", "LICENSE.lesser"]
 authors = [
@@ -31,7 +31,6 @@ classifiers = [
     "Topic :: Internet",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -40,6 +39,7 @@ classifiers = [
 ]
 dependencies = [
     "httpx >=0.27,<0.29",
+    "httpcore >=1.0.9; python_version >= '3.14'"  # httpx doesn't pin this as of 0.28.1
 ]
 
 [project.urls]
@@ -60,7 +60,7 @@ all = [
 ]
 callback-data = [
     # Cachetools doesn't have a strict stability policy. Let's be cautious for now.
-    "cachetools>=5.3.3,<6.3.0",
+    "cachetools>=7.0.0,<8.0.0",
 ]
 ext = [
     "python-telegram-bot[callback-data,job-queue,rate-limiter,webhooks]",
@@ -93,7 +93,7 @@ tests = [
     # required for building the wheels for releases
     "build",
     # For the test suite
-    "pytest==8.4.2",
+    "pytest==9.0.2",
     # needed because pytest doesn't come with native support for coroutines as tests
     "pytest-asyncio==0.21.2",
     # xdist runs tests in parallel
@@ -111,13 +111,13 @@ tests = [
     "pytest-cov"
 ]
 docs = [
-    "chango~=0.5.0; python_version >= '3.12'",
-    "sphinx==8.2.3; python_version >= '3.11'",
-    "furo==2025.9.25",
+    "chango~=0.6.0; python_version >= '3.12'",
+    "sphinx==9.1.0; python_version >= '3.12'",
+    "furo==2025.12.19",
     "sphinx-paramlinks==0.6.0",
-    "sphinxcontrib-mermaid==1.0.0",
+    "sphinxcontrib-mermaid==2.0.1",
     "sphinx-copybutton==0.5.2",
-    "sphinx-inline-tabs==2023.4.21",
+    "sphinx-inline-tabs==2025.12.21.14",
     # Temporary. See #4387
     "sphinx-build-compatibility @ git+https://github.com/readthedocs/sphinx-build-compatibility.git@58aabc5f207c6c2421f23d3578adc0b14af57047",
     # For python 3.14 support, we need a version of pydantic-core >= 2.35.0, since it upgrades the
@@ -127,10 +127,10 @@ docs = [
     "pydantic >= 2.12.0a1 ; python_version >= '3.14'"
 ]
 linting = [
-    "pre-commit",
-    "ruff==0.13.2",
-    "mypy==1.18.2",
-    "pylint==3.3.8"
+    "prek",
+    "ruff==0.15.6",
+    "mypy==1.19.1",
+    "pylint==4.0.5"
 ]
 all = [{ include-group = "tests" }, { include-group = "docs" }, { include-group = "linting"}]
 
@@ -160,7 +160,7 @@ show-fixes = true
 
 [tool.ruff.lint]
 typing-extensions = false
-ignore = ["PLR2004", "PLR0911", "PLR0912", "PLR0913", "PLR0915", "PERF203"]
+ignore = ["PLR2004", "PLR0911", "PLR0912", "PLR0913", "PLR0915", "PERF203", "ASYNC240"]
 select = ["E", "F", "I", "PL", "UP", "RUF", "PTH", "C4", "B", "PIE", "SIM", "RET", "RSE",
           "G", "ISC", "PT", "ASYNC", "TCH", "SLOT", "PERF", "PYI", "FLY", "AIR", "RUF022",
           "RUF023", "Q", "INP", "W", "YTT", "DTZ", "ARG", "T20", "FURB", "DOC", "TRY", 
@@ -193,6 +193,7 @@ disable = ["duplicate-code", "too-many-arguments", "too-many-public-methods",
 #  run pylint across multiple cpu cores to speed it up-
 # https://pylint.pycqa.org/en/latest/user_guide/run.html?#parallel-execution to know more
 jobs = 0
+py-version = "3.10"
 
 [tool.pylint.classes]
 exclude-protected = ["_unfrozen"]
@@ -230,7 +231,7 @@ disallow_untyped_defs = true
 disallow_incomplete_defs = true
 disallow_untyped_decorators = true
 show_error_codes = true
-python_version = "3.9"
+python_version = "3.10"
 
 # For some files, it's easier to just disable strict-optional all together instead of
 # cluttering the code with `# type: ignore`s or stuff like

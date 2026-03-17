@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
 # A library that provides a Python interface to the Telegram Bot API
-# Copyright (C) 2015-2025
+# Copyright (C) 2015-2026
 # Leandro Toledo de Souza <devs@python-telegram-bot.org>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -106,8 +106,10 @@ class TestBusinessMethodsWithoutRequest(BusinessMethodsTestBase):
             assert data.get("exclude_unsaved") is bool_param
             assert data.get("exclude_saved") is bool_param
             assert data.get("exclude_unlimited") is bool_param
-            assert data.get("exclude_limited") is bool_param
+            assert data.get("exclude_limited_upgradable") is bool_param
+            assert data.get("exclude_limited_non_upgradable") is bool_param
             assert data.get("exclude_unique") is bool_param
+            assert data.get("exclude_from_blockchain") is bool_param
             assert data.get("sort_by_price") is bool_param
             assert data.get("offset") == offset
             assert data.get("limit") == limit
@@ -120,8 +122,10 @@ class TestBusinessMethodsWithoutRequest(BusinessMethodsTestBase):
             exclude_unsaved=bool_param,
             exclude_saved=bool_param,
             exclude_unlimited=bool_param,
-            exclude_limited=bool_param,
+            exclude_limited_upgradable=bool_param,
+            exclude_limited_non_upgradable=bool_param,
             exclude_unique=bool_param,
+            exclude_from_blockchain=bool_param,
             sort_by_price=bool_param,
             offset=offset,
             limit=limit,
@@ -214,7 +218,7 @@ class TestBusinessMethodsWithoutRequest(BusinessMethodsTestBase):
 
     async def test_set_business_account_gift_settings(self, offline_bot, monkeypatch):
         show_gift_button = True
-        accepted_gift_types = AcceptedGiftTypes(True, True, True, True)
+        accepted_gift_types = AcceptedGiftTypes(True, True, True, True, True)
 
         async def make_assertion(*args, **kwargs):
             data = kwargs.get("request_data").json_parameters
@@ -789,3 +793,55 @@ class TestBusinessMethodsWithoutRequest(BusinessMethodsTestBase):
             reply_markup=reply_markup,
         )
         assert isinstance(obj, Message)
+
+    async def test_repost_story(self, offline_bot, monkeypatch):
+        """No way to test this without stories"""
+
+        async def make_assertion(url, request_data, *args, **kwargs):
+            for param in (
+                "business_connection_id",
+                "from_chat_id",
+                "from_story_id",
+                "active_period",
+                "post_to_chat_page",
+                "protect_content",
+            ):
+                assert request_data.parameters.get(param) == param
+            return Story(chat=Chat(id=1, type=Chat.PRIVATE), id=42).to_dict()
+
+        monkeypatch.setattr(offline_bot.request, "post", make_assertion)
+
+        story = await offline_bot.repost_story(
+            business_connection_id="business_connection_id",
+            from_chat_id="from_chat_id",
+            from_story_id="from_story_id",
+            active_period="active_period",
+            post_to_chat_page="post_to_chat_page",
+            protect_content="protect_content",
+        )
+        assert story.chat.id == 1
+        assert story.id == 42
+
+    @pytest.mark.parametrize("default_bot", [{"protect_content": True}], indirect=True)
+    @pytest.mark.parametrize(
+        ("passed_value", "expected_value"),
+        [(DEFAULT_NONE, True), (False, False), (None, None)],
+    )
+    async def test_repost_story_default_protect_content(
+        self, default_bot, monkeypatch, passed_value, expected_value
+    ):
+        async def make_assertion(url, request_data, *args, **kwargs):
+            assert request_data.parameters.get("protect_content") == expected_value
+            return Story(chat=Chat(123, "private"), id=123).to_dict()
+
+        monkeypatch.setattr(default_bot.request, "post", make_assertion)
+        kwargs = {
+            "business_connection_id": self.bci,
+            "from_chat_id": 123,
+            "from_story_id": 456,
+            "active_period": dtm.timedelta(seconds=20),
+        }
+        if passed_value is not DEFAULT_NONE:
+            kwargs["protect_content"] = passed_value
+
+        await default_bot.repost_story(**kwargs)

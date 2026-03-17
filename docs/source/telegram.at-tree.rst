@@ -65,6 +65,8 @@ Available Types
     telegram.chatmemberowner
     telegram.chatmemberrestricted
     telegram.chatmemberupdated
+    telegram.chatownerchanged
+    telegram.chatownerleft
     telegram.chatpermissions
     telegram.chatphoto
     telegram.chatshared
@@ -83,6 +85,7 @@ Available Types
     telegram.forumtopicreopened
     telegram.generalforumtopichidden
     telegram.generalforumtopicunhidden
+    telegram.giftbackground
     telegram.giftinfo
     telegram.giveaway
     telegram.giveawaycompleted
@@ -181,6 +184,7 @@ Available Types
     telegram.telegramobject
     telegram.textquote
     telegram.uniquegift
+    telegram.uniquegiftcolors
     telegram.uniquegiftbackdrop
     telegram.uniquegiftbackdropcolors
     telegram.uniquegiftinfo
@@ -189,7 +193,9 @@ Available Types
     telegram.update
     telegram.user
     telegram.userchatboosts
+    telegram.userprofileaudios
     telegram.userprofilephotos
+    telegram.userrating
     telegram.usersshared
     telegram.venue
     telegram.video
@@ -198,6 +204,7 @@ Available Types
     telegram.videochatscheduled
     telegram.videochatstarted
     telegram.videonote
+    telegram.videoquality
     telegram.voice
     telegram.webappdata
     telegram.webappinfo

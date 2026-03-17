@@ -1,6 +1,6 @@
 #
 #  A library that provides a Python interface to the Telegram Bot API
-#  Copyright (C) 2015-2025
+#  Copyright (C) 2015-2026
 #  Leandro Toledo de Souza <devs@python-telegram-bot.org>
 #
 #  This program is free software: you can redistribute it and/or modify
@@ -101,7 +101,7 @@ def autodoc_process_docstring(
     """
 
     # 1) Insert the Keyword Args and "Shortcuts" admonitions for the Bot methods
-    method_name = name.split(".")[-1]
+    method_name = name.rsplit(".", maxsplit=1)[0]
     if (
         name.startswith("telegram.Bot.")
         and what == "method"

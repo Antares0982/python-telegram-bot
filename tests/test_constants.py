@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
 # A library that provides a Python interface to the Telegram Bot API
-# Copyright (C) 2015-2025
+# Copyright (C) 2015-2026
 # Leandro Toledo de Souza <devs@python-telegram-bot.org>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -198,6 +198,7 @@ class TestConstantsWithoutRequest:
             "reply_markup",
             "reply_to_message",
             "sender_chat",
+            "sender_tag",
             "is_accessible",
             "quote",
             "external_reply",
@@ -253,6 +254,14 @@ class TestConstantsWithoutRequest:
                 constants.MessageAttachmentType(name)
             except ValueError:
                 pytest.fail(f"Missing MessageAttachmentType for {match.group(1)}")
+
+    def test_keyboard_button_style(self):
+        assert constants.KeyboardButtonStyle.PRIMARY == "primary"
+        assert constants.KeyboardButtonStyle.SUCCESS == "success"
+        assert constants.KeyboardButtonStyle.DANGER == "danger"
+        assert constants.KeyboardButtonStyle.BLUE == "primary"
+        assert constants.KeyboardButtonStyle.GREEN == "success"
+        assert constants.KeyboardButtonStyle.RED == "danger"
 
 
 class TestConstantsWithRequest:

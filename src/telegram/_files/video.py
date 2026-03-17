@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
 # A library that provides a Python interface to the Telegram Bot API
-# Copyright (C) 2015-2025
+# Copyright (C) 2015-2026
 # Leandro Toledo de Souza <devs@python-telegram-bot.org>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -20,10 +20,11 @@
 
 import datetime as dtm
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING
 
 from telegram._files._basethumbedmedium import _BaseThumbedMedium
 from telegram._files.photosize import PhotoSize
+from telegram._files.videoquality import VideoQuality
 from telegram._utils.argumentparsing import de_list_optional, parse_sequence_arg, to_timedelta
 from telegram._utils.datetime import get_timedelta_value
 from telegram._utils.types import JSONDict, TimePeriod
@@ -70,6 +71,10 @@ class Video(_BaseThumbedMedium):
 
             .. versionchanged:: v22.2
                 |time-period-input|
+        qualities (Sequence[:class:`telegram.VideoQuality`], optional): List of available qualities
+            of the video
+
+            .. versionadded:: 22.7
 
     Attributes:
         file_id (:obj:`str`): Identifier for this file, which can be used to download
@@ -100,6 +105,10 @@ class Video(_BaseThumbedMedium):
 
             .. deprecated:: v22.2
                 |time-period-int-deprecated|
+        qualities (Sequence[:class:`telegram.VideoQuality`]): Optional. List of available qualities
+            of the video
+
+            .. versionadded:: 22.7
     """
 
     __slots__ = (
@@ -109,6 +118,7 @@ class Video(_BaseThumbedMedium):
         "file_name",
         "height",
         "mime_type",
+        "qualities",
         "width",
     )
 
@@ -119,14 +129,15 @@ class Video(_BaseThumbedMedium):
         width: int,
         height: int,
         duration: TimePeriod,
-        mime_type: Optional[str] = None,
-        file_size: Optional[int] = None,
-        file_name: Optional[str] = None,
-        thumbnail: Optional[PhotoSize] = None,
-        cover: Optional[Sequence[PhotoSize]] = None,
-        start_timestamp: Optional[TimePeriod] = None,
+        mime_type: str | None = None,
+        file_size: int | None = None,
+        file_name: str | None = None,
+        thumbnail: PhotoSize | None = None,
+        cover: Sequence[PhotoSize] | None = None,
+        start_timestamp: TimePeriod | None = None,
+        qualities: Sequence[VideoQuality] | None = None,
         *,
-        api_kwargs: Optional[JSONDict] = None,
+        api_kwargs: JSONDict | None = None,
     ):
         super().__init__(
             file_id=file_id,
@@ -141,26 +152,28 @@ class Video(_BaseThumbedMedium):
             self.height: int = height
             self._duration: dtm.timedelta = to_timedelta(duration)
             # Optional
-            self.mime_type: Optional[str] = mime_type
-            self.file_name: Optional[str] = file_name
-            self.cover: Optional[Sequence[PhotoSize]] = parse_sequence_arg(cover)
-            self._start_timestamp: Optional[dtm.timedelta] = to_timedelta(start_timestamp)
+            self.mime_type: str | None = mime_type
+            self.file_name: str | None = file_name
+            self.cover: Sequence[PhotoSize] | None = parse_sequence_arg(cover)
+            self._start_timestamp: dtm.timedelta | None = to_timedelta(start_timestamp)
+            self.qualities: Sequence[VideoQuality] | None = parse_sequence_arg(qualities)
 
     @property
-    def duration(self) -> Union[int, dtm.timedelta]:
+    def duration(self) -> int | dtm.timedelta:
         return get_timedelta_value(  # type: ignore[return-value]
             self._duration, attribute="duration"
         )
 
     @property
-    def start_timestamp(self) -> Optional[Union[int, dtm.timedelta]]:
+    def start_timestamp(self) -> dtm.timedelta | None | int:
         return get_timedelta_value(self._start_timestamp, attribute="start_timestamp")
 
     @classmethod
-    def de_json(cls, data: JSONDict, bot: Optional["Bot"] = None) -> "Video":
+    def de_json(cls, data: JSONDict, bot: "Bot | None" = None) -> "Video":
         """See :meth:`telegram.TelegramObject.de_json`."""
         data = cls._parse_data(data)
 
         data["cover"] = de_list_optional(data.get("cover"), PhotoSize, bot)
+        data["qualities"] = de_list_optional(data.get("qualities"), VideoQuality, bot)
 
         return super().de_json(data=data, bot=bot)

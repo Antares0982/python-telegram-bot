@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
 # A library that provides a Python interface to the Telegram Bot API
-# Copyright (C) 2015-2025
+# Copyright (C) 2015-2026
 # Leandro Toledo de Souza <devs@python-telegram-bot.org>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -16,11 +16,13 @@
 #
 # You should have received a copy of the GNU Lesser Public License
 # along with this program.  If not, see [http://www.gnu.org/licenses/].
+import datetime as dtm
 import random
 
 import pytest
 
 from telegram import MessageEntity, User
+from telegram._utils.datetime import UTC, to_timestamp
 from telegram.constants import MessageEntityType
 from tests.auxil.slots import mro_slots
 
@@ -37,7 +39,25 @@ def message_entity(request):
     language = None
     if type_ == MessageEntity.PRE:
         language = "python"
-    return MessageEntity(type_, 1, 3, url=url, user=user, language=language)
+    custom_emoji_id = None
+    if type_ == MessageEntity.CUSTOM_EMOJI:
+        custom_emoji_id = "emoji_id"
+    date_time_format = None
+    unix_time = None
+    if type_ == MessageEntity.DATE_TIME:
+        date_time_format = "wDT"
+        unix_time = dtm.datetime.now(tz=UTC)
+    return MessageEntity(
+        type_,
+        1,
+        3,
+        url=url,
+        user=user,
+        language=language,
+        custom_emoji_id=custom_emoji_id,
+        date_time_format=date_time_format,
+        unix_time=unix_time,
+    )
 
 
 class MessageEntityTestBase:
@@ -76,6 +96,11 @@ class TestMessageEntityWithoutRequest(MessageEntityTestBase):
             assert entity_dict["user"] == message_entity.user.to_dict()
         if message_entity.language:
             assert entity_dict["language"] == message_entity.language
+        if message_entity.custom_emoji_id:
+            assert entity_dict["custom_emoji_id"] == message_entity.custom_emoji_id
+        if message_entity.date_time_format:
+            assert entity_dict["date_time_format"] == message_entity.date_time_format
+            assert entity_dict["unix_time"] == to_timestamp(message_entity.unix_time)
 
     def test_enum_init(self):
         entity = MessageEntity(type="foo", offset=0, length=1)
@@ -96,7 +121,7 @@ class TestMessageEntityWithoutRequest(MessageEntityTestBase):
             for _input, _ in inputs_outputs
         ]
         utf_16_entities = MessageEntity.adjust_message_entities_to_utf_16(text, unicode_entities)
-        for out_entity, input_output in zip(utf_16_entities, inputs_outputs):
+        for out_entity, input_output in zip(utf_16_entities, inputs_outputs, strict=False):
             _, output = input_output
             offset, length = output
             assert out_entity.offset == offset
@@ -144,7 +169,9 @@ class TestMessageEntityWithoutRequest(MessageEntityTestBase):
 
         assert new_text == "prefix 𝛙𝌢𑁍 | text 𝛙𝌢𑁍 | suffix 𝛙𝌢𑁍"
         assert [entity.offset for entity in new_entities] == [0, 16, 30]
-        for old, new in zip([first_entity, second_entity, third_entity], new_entities):
+        for old, new in zip(
+            [first_entity, second_entity, third_entity], new_entities, strict=False
+        ):
             assert new is not old
             assert new.type == old.type
             for key, value in kwargs.items():

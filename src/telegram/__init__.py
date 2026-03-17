@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
 # A library that provides a Python interface to the Telegram Bot API
-# Copyright (C) 2015-2025
+# Copyright (C) 2015-2026
 # Leandro Toledo de Souza <devs@python-telegram-bot.org>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -79,6 +79,8 @@ __all__ = (
     "ChatMemberOwner",
     "ChatMemberRestricted",
     "ChatMemberUpdated",
+    "ChatOwnerChanged",
+    "ChatOwnerLeft",
     "ChatPermissions",
     "ChatPhoto",
     "ChatShared",
@@ -111,6 +113,7 @@ __all__ = (
     "GeneralForumTopicHidden",
     "GeneralForumTopicUnhidden",
     "Gift",
+    "GiftBackground",
     "GiftInfo",
     "Gifts",
     "Giveaway",
@@ -287,13 +290,16 @@ __all__ = (
     "UniqueGift",
     "UniqueGiftBackdrop",
     "UniqueGiftBackdropColors",
+    "UniqueGiftColors",
     "UniqueGiftInfo",
     "UniqueGiftModel",
     "UniqueGiftSymbol",
     "Update",
     "User",
     "UserChatBoosts",
+    "UserProfileAudios",
     "UserProfilePhotos",
+    "UserRating",
     "UsersShared",
     "Venue",
     "Video",
@@ -302,6 +308,7 @@ __all__ = (
     "VideoChatScheduled",
     "VideoChatStarted",
     "VideoNote",
+    "VideoQuality",
     "Voice",
     "WebAppData",
     "WebAppInfo",
@@ -397,6 +404,7 @@ from ._chatmember import (
     ChatMemberRestricted,
 )
 from ._chatmemberupdated import ChatMemberUpdated
+from ._chatowner import ChatOwnerChanged, ChatOwnerLeft
 from ._chatpermissions import ChatPermissions
 from ._checklists import Checklist, ChecklistTask, ChecklistTasksAdded, ChecklistTasksDone
 from ._choseninlineresult import ChosenInlineResult
@@ -439,6 +447,7 @@ from ._files.sticker import MaskPosition, Sticker, StickerSet
 from ._files.venue import Venue
 from ._files.video import Video
 from ._files.videonote import VideoNote
+from ._files.videoquality import VideoQuality
 from ._files.voice import Voice
 from ._forcereply import ForceReply
 from ._forumtopic import (
@@ -453,7 +462,7 @@ from ._forumtopic import (
 from ._games.callbackgame import CallbackGame
 from ._games.game import Game
 from ._games.gamehighscore import GameHighScore
-from ._gifts import AcceptedGiftTypes, Gift, GiftInfo, Gifts
+from ._gifts import AcceptedGiftTypes, Gift, GiftBackground, GiftInfo, Gifts
 from ._giveaway import Giveaway, GiveawayCompleted, GiveawayCreated, GiveawayWinners
 from ._inline.inlinekeyboardbutton import InlineKeyboardButton
 from ._inline.inlinekeyboardmarkup import InlineKeyboardMarkup
@@ -597,13 +606,16 @@ from ._uniquegift import (
     UniqueGift,
     UniqueGiftBackdrop,
     UniqueGiftBackdropColors,
+    UniqueGiftColors,
     UniqueGiftInfo,
     UniqueGiftModel,
     UniqueGiftSymbol,
 )
 from ._update import Update
 from ._user import User
+from ._userprofileaudios import UserProfileAudios
 from ._userprofilephotos import UserProfilePhotos
+from ._userrating import UserRating
 from ._videochat import (
     VideoChatEnded,
     VideoChatParticipantsInvited,
