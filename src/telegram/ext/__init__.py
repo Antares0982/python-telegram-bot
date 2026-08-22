@@ -48,6 +48,7 @@ __all__ = (
     "InvalidCallbackData",
     "Job",
     "JobQueue",
+    "ManagedBotUpdatedHandler",
     "MessageHandler",
     "MessageReactionHandler",
     "PaidMediaPurchasedHandler",
@@ -90,6 +91,7 @@ from ._handlers.choseninlineresulthandler import ChosenInlineResultHandler
 from ._handlers.commandhandler import CommandHandler
 from ._handlers.conversationhandler import ConversationHandler, ConversationHandlerEx
 from ._handlers.inlinequeryhandler import InlineQueryHandler
+from ._handlers.managedbotupdatedhandler import ManagedBotUpdatedHandler
 from ._handlers.messagehandler import MessageHandler
 from ._handlers.messagereactionhandler import MessageReactionHandler
 from ._handlers.paidmediapurchasedhandler import PaidMediaPurchasedHandler
