@@ -13,7 +13,7 @@ pypkgs: with pypkgs; [
   aiolimiter
   tornado
   cachetools
-  APScheduler
+  apscheduler
   pytz
   build
   twine
